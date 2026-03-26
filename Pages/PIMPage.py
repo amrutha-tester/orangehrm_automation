@@ -1,10 +1,10 @@
 from time import time
-
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import ElementClickInterceptedException
+import allure
 
 
 class PIMPage:
@@ -30,30 +30,36 @@ class PIMPage:
         self.name_search_locator = (By.XPATH, "(//input[@placeholder='Type for hints...'])[1]")
         self.delete_button_locator = (By.XPATH, "//div[@class='oxd-table-body']//div[1]//div[@class='oxd-table-cell-actions']//button[i[contains(@class, 'bi-trash')]]")
         self.confirm_delete_button_locator = (By.CSS_SELECTOR, "button[class='oxd-button oxd-button--medium oxd-button--label-danger orangehrm-button-margin']")
-        self.record_count_span = (By.XPATH, "//div[contains(@class, 'orangehrm-horizontal-padding')]//span")
+        self.record_count_span = (By.XPATH, "//div[contains(@class, 'orangehrm-horizontal-padding')]//span[contains(., 'Found')]")
         
+    @allure.step("Click PIM menu")
     def click_pim_menu(self):
         self.driver.find_element(*self.pim_menu_locator).click()
 
+    @allure.step("Click Add Employee button")
     def click_add_employee(self):
         self.driver.find_element(*self.add_employee_button_locator).click()
         WebDriverWait(self.driver, 20).until(EC.visibility_of_element_located(self.first_name_locator))
 
+    @allure.step("Enter first name: {1}")
     def enter_first_name(self, first_name):
         self.driver.find_element(*self.first_name_locator).clear()
         self.driver.find_element(*self.first_name_locator).send_keys(first_name)
         WebDriverWait(self.driver, 20).until(EC.visibility_of_element_located(self.first_name_locator))
 
+    @allure.step("Enter middle name: {1}")
     def enter_middle_name(self, middle_name):
         self.driver.find_element(*self.middle_name_locator).clear()
         self.driver.find_element(*self.middle_name_locator).send_keys(middle_name)
         WebDriverWait(self.driver, 20).until(EC.visibility_of_element_located(self.middle_name_locator))
 
+    @allure.step("Enter last name: {1}")
     def enter_last_name(self, last_name):
         self.driver.find_element(*self.last_name_locator).clear()
         self.driver.find_element(*self.last_name_locator).send_keys(last_name)
         WebDriverWait(self.driver, 20).until(EC.visibility_of_element_located(self.last_name_locator))
 
+    @allure.step("Enter employee ID: {1}")
     def enter_employee_id(self, employee_id):
         element = WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable(self.employee_id_locator))
         # Use Ctrl+A and Backspace to ensure the field is cleared, as .clear() can be flaky on dynamic forms
@@ -61,11 +67,13 @@ class PIMPage:
         element.send_keys(Keys.BACK_SPACE)
         element.send_keys(employee_id)
 
+    @allure.step("Get employee ID value")
     def get_employee_id_value(self):
         element = WebDriverWait(self.driver, 20).until(EC.visibility_of_element_located(self.employee_id_locator))
         return element.get_attribute("value")
 
     
+    @allure.step("Click Save button")
     def click_save(self):
         save_btn = WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable(self.save_button_locator))
         try:
@@ -75,16 +83,19 @@ class PIMPage:
             self.driver.execute_script("arguments[0].click();", save_btn)
         WebDriverWait(self.driver, 20).until(EC.visibility_of_element_located(self.success_message_locator))
             
+    @allure.step("Verify if Personal Details page is visible")
     def is_personal_details_visible(self):
         # Wait first for URL change
         return WebDriverWait(self.driver, 20).until(EC.url_contains("viewPersonalDetails"))
        
     
+    @allure.step("Get success message text")
     def get_success_message(self):
         success_message = WebDriverWait(self.driver, 20).until(EC.visibility_of_element_located(self.success_message_locator))
         return success_message.text
   
     
+    @allure.step("Search employee by ID: {1}")
     def search_employee_by_id(self, employee_id):
         # Wait for the search field to be clickable before interacting
         search_field = WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable(self.employee_id_search_locator))
@@ -96,6 +107,7 @@ class PIMPage:
         WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable(self.search_button_locator)).click()
 
      
+    @allure.step("Get employee ID from search results")
     def get_employee_id_from_search_result(self, expected_id=None):
         # If expected_id is provided, wait for the cell text to match it.
         # This prevents reading stale data from the table before the search completes.
@@ -109,13 +121,15 @@ class PIMPage:
         )
         return id_cell.text
     
+    @allure.step("Get 'No Records Found' message")
     def get_no_records_message(self):
-        no_records_locator = (By.CSS_SELECTOR, "span[class='oxd-text oxd-text--span']")
+        # Use the specific locator for record count span
         no_records_message = WebDriverWait(self.driver, 20).until(
-            EC.visibility_of_element_located(no_records_locator)
+            EC.visibility_of_element_located(self.record_count_span)
         )
         return no_records_message.text
     
+    @allure.step("Search employee by name: {1}")
     def search_employee_by_name(self, name):
         search_field = WebDriverWait(self.driver, 20).until(
             EC.element_to_be_clickable(self.name_search_locator)
@@ -126,6 +140,7 @@ class PIMPage:
         self.driver.find_element(*self.employee_id_locator).clear()  # Clear the Employee ID field to ensure only name is used for search
         WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable(self.search_button_locator)).click()
 
+    @allure.step("Click Delete button")
     def click_delete_button(self):
         from selenium.common.exceptions import StaleElementReferenceException
         # Wait for the table to load and the delete button to be visible before clicking
@@ -137,14 +152,23 @@ class PIMPage:
             # If the element becomes stale, it means the page has refreshed. We should try to find it again.
             WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable(self.delete_button_locator)).click()
         
+    @allure.step("Confirm employee deletion")
     def click_confirm_delete_button(self):
         # Wait for the confirm delete button to be clickable before clicking
         WebDriverWait(self.driver, 20).until(EC.element_to_be_clickable(self.confirm_delete_button_locator)).click()
         
+    @allure.step("Get success message after deletion")
     def get_success_message_after_delete(self):
         return WebDriverWait(self.driver, 20).until(EC.visibility_of_element_located(self.success_message_locator)).text
     
+    @allure.step("Verify if Employee List is visible")
     def is_employee_list_visible(self):
            return WebDriverWait(self.driver, 20).until(EC.url_contains("viewEmployeeList"))
+    
+    def wait_for_success_toast_to_disappear(self):
+        WebDriverWait(self.driver, 10).until(EC.invisibility_of_element_located(self.success_message_locator))
+
+    def wait_for_no_records_found(self):
+          WebDriverWait(self.driver, 20).until(EC.text_to_be_present_in_element(self.record_count_span, "No Records Found"))
     
         

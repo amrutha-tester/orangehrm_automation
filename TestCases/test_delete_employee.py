@@ -5,10 +5,14 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+import allure
 
-import pytest
 from Pages.PIMPage import PIMPage
 import logging
+
+@allure.feature("PIM")
+@allure.story("Delete Employee")
+@allure.severity(allure.severity_level.NORMAL)
 
 def test_delete_employee(login_admin):
     delete_employee = PIMPage(login_admin)
@@ -30,6 +34,9 @@ def test_delete_employee(login_admin):
     delete_employee.click_pim_menu()  
     delete_employee.search_employee_by_id(employee_id) # Ensure we're on the Employee List page
 
+    # Wait for the search results to update to the correct employee before deleting.
+    delete_employee.get_employee_id_from_search_result(employee_id)
+
     # Delete the employee and verify deletion
     delete_employee.click_delete_button()
     delete_employee.click_confirm_delete_button()
@@ -37,19 +44,17 @@ def test_delete_employee(login_admin):
     assert "Successfully Deleted" in success_text
     logging.info("Successfully deleted employee.")
 
-     # Wait for the employee list page to be visible after deletion to ensure the page has refreshed and the employee list is updated
-    delete_employee.is_employee_list_visible() 
-    # Verification after deletion
+    # Wait for the success toast to disappear
+    delete_employee.wait_for_success_toast_to_disappear()
+
+    # Navigate back to the PIM page (Employee List) to ensure we are on the correct page
     delete_employee.click_pim_menu()
+    # Wait for a key element on the PIM list page to be visible, ensuring the page is loaded
+    WebDriverWait(delete_employee.driver, 20).until(EC.visibility_of_element_located(delete_employee.employee_id_search_locator))
 
-    # Wait for the default employee list to load before performing the search.
-  
-    WebDriverWait(delete_employee.driver, 10).until(EC.visibility_of_element_located(delete_employee.record_count_span))
-    
+    # verfication after deletion
     delete_employee.search_employee_by_id(employee_id)
+    delete_employee.wait_for_no_records_found()
+    assert delete_employee.get_no_records_message() == "No Records Found"
 
-    # Wait for the record count to update to "No Records Found"
-    WebDriverWait(delete_employee.driver, 20).until(
-        EC.text_to_be_present_in_element(delete_employee.record_count_span, "No Records Found")
-    )
     logging.info("Successfully verified employee deletion.")
