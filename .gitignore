@@ -1,0 +1,22 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.venv/
+venv/
+ENV/
+env/
+
+# Allure Reports and Results
+allure-results/
+allure-report/
+temp-allure-results/
+
+# IDEs
+.vscode/
+.idea/
+
+# Logs and databases
+*.log
