@@ -48,8 +48,7 @@ user details
 ## Scalability: Data‑Driven Testing
 
 **Design:** - Uses @pytest.mark.parametrize to execute Add Employee
-tests with multiple datasets such as: - Special characters - Long
-names - Edge case inputs
+tests with multiple datasets
 
 ## Key Engineering Features
 
