@@ -1,10 +1,14 @@
+from ast import Add
+
 import pytest
 from selenium import webdriver
 import configparser
 import os
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import WebDriverException
 import time
+import allure
 
 # Function to read the config file
 def read_config():
@@ -12,6 +16,9 @@ def read_config():
     # Construct the absolute path to config.ini
     # This makes the test runner location-independent
     config_path = os.path.join(os.path.dirname(__file__), '..', 'config.ini')
+    if not os.path.exists(config_path):
+        print(f"\nWARNING: Config file not found at: {config_path}")
+    
     config.read(config_path)
     return config
 
@@ -26,16 +33,49 @@ def pytest_addoption(parser):
 @pytest.fixture(scope="function")
 def driver(config, request):
     """Fixture to set up and tear down the WebDriver for each test."""
-    # Setup: Create and configure the WebDriver
-    browser = request.config.getoption("--browser")
-    # Selenium 4.6+ includes Selenium Manager, which automatically handles driver management.
-    # This removes the need for the external webdriver-manager library and simplifies setup.
-    if browser == "firefox":
-        driver = webdriver.Firefox()
+    
+    browser = request.config.getoption("--browser").lower()
+    # Priority: 1. Environment Variable (Docker), 2. Config file (Local override), 3. None
+    grid_url = os.getenv("SELENIUM_GRID_URL") or config.get('common', 'grid_url', fallback=None)
+
+    options = None
+    
+    # Setup WebDriver options based on the selected browser
+    if browser == "chrome":
+        options = webdriver.ChromeOptions()
     elif browser == "edge":
-        driver = webdriver.Edge()
+        options = webdriver.EdgeOptions()
+    elif browser == "firefox":
+        options = webdriver.FirefoxOptions()
     else:
-        driver = webdriver.Chrome()
+        raise ValueError(f"Unsupported browser: '{browser}'")
+    
+    # Add stability flags for Docker/Linux environments
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+
+    # Remote execution on Selenium Grid
+    if grid_url:
+        print(f"Running tests on Selenium Grid: {grid_url}")
+       # Try to connect 5 times with a 5-second sleep in between
+        for i in range(5):
+            try:
+                driver = webdriver.Remote(command_executor=grid_url, options=options)
+                break 
+            except Exception as e:
+                if i == 4: raise e # Crash only if all 5 attempts fail
+                print(f"Waiting for Selenium Hub to wake up... (Attempt {i+1}/5)")
+                time.sleep(5)
+    else:
+        # Local execution
+        print("Running tests locally.")
+        if browser == "chrome":
+            driver = webdriver.Chrome(options=options)
+        elif browser == "firefox":
+            driver = webdriver.Firefox(options=options)
+        elif browser == "edge":
+            driver = webdriver.Edge(options=options)
+
     driver.implicitly_wait(10)
     driver.maximize_window()
 
@@ -89,6 +129,13 @@ def pytest_runtest_makereport(item, call):
             timestamp = time.strftime("%Y-%m-%d_%H-%M-%S")
             screenshot_file = os.path.join(screenshots_dir, f"{test_name}_{timestamp}.png")
             driver.save_screenshot(screenshot_file)
+
+            # Attach screenshot to Allure report
+            allure.attach(
+                driver.get_screenshot_as_png(),
+                name=f"failure_{test_name}",
+                attachment_type=allure.attachment_type.PNG
+            )
             
             # Attach screenshot to pytest-html report if the plugin is installed
             # Handle both 'extras' (pytest-html 4.x+) and 'extra' (older versions)

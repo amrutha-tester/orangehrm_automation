@@ -1,20 +1,14 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
-import time
+import allure
 
-# 1. Setup the Chrome Driver automatically
-driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
-
-# 2. Open the OrangeHRM Demo site
-driver.get("https://opensource-demo.orangehrmlive.com/")
-driver.maximize_window()
-
-# 3. Validation: Print the page title to the console
-print(f"The page title is: {driver.title}")
-
-# 4. Wait for 3 seconds so you can see it worked
-time.sleep(3)
-
-# 5. Close the browser
-driver.quit()
+@allure.feature("Smoke Test")
+@allure.story("Verify Application Reachability")
+def test_open_orangehrm(driver):
+    """
+    Smoke test to verify that the OrangeHRM page loads correctly.
+    The 'driver' fixture handles setup, navigation to the base URL, and teardown.
+    """
+    # Print the page title for visibility in console output
+    print(f"The page title is: {driver.title}")
+    
+    # Validation: Assert that the title contains the expected brand name
+    assert "OrangeHRM" in driver.title, f"Expected title to contain 'OrangeHRM', but got '{driver.title}'"
