@@ -1,144 +1,269 @@
 # OrangeHRM Professional Test Automation Framework
 
-This repository features a robust, end-to-end automation suite for the
-OrangeHRM application. Built with Python and Selenium WebDriver, the
-project demonstrates advanced framework engineering concepts, including
-the Page Object Model (POM), Data-Driven Testing, and Asynchronous UI
-handling.
+![Python](https://img.shields.io/badge/Python-3.x-blue)
+![Selenium](https://img.shields.io/badge/Selenium-WebDriver-green)
+![Docker](https://img.shields.io/badge/Docker-Containerized-blue)
+![Jenkins](https://img.shields.io/badge/Jenkins-CI%2FCD-red)
+![Pytest](https://img.shields.io/badge/Pytest-Framework-yellow)
+![Allure](https://img.shields.io/badge/Reporting-Allure-purple)
 
-##  Test Scenarios & Portfolio Highlights
+------------------------------------------------------------------------
 
-The suite validates the full CRUD (Create, Read, Update, Delete)
-lifecycle and persona-based access across these scenarios:
+##  Overview
+
+This repository contains a **System-level Functional Automation
+Framework** designed for the OrangeHRM platform. It leverages **Selenium
+Grid** and **Docker** for containerized browser orchestration and is
+fully integrated into a **CI/CD Pipeline with Jenkins** for automated
+quality assurance.
+
+------------------------------------------------------------------------
+
+##  Architecture
+
+### Framework Design
+
+-   **Test Layer →** Pytest test scenarios
+-   **Page Layer →** Page Object Model (POM)
+-   **Execution Layer →** Selenium Grid
+-   **Infrastructure Layer →** Docker Compose
+-   **Pipeline Layer →** Jenkins CI/CD
+-   **Reporting Layer →** Allure Reports
+
+------------------------------------------------------------------------
+
+##  Infrastructure Highlights
+
+### Distributed Execution
+
+Runs tests across multiple browsers:
+
+-   Chrome
+-   Firefox
+-   Edge
+
+Using Selenium Grid Hub & Nodes.
+
+### Containerization
+
+Docker Compose orchestrates:
+
+-   Selenium Hub
+-   Browser Nodes
+-   Test Runner Container
+
+This guarantees reproducible execution environments.
+
+### CI/CD Integration
+
+Jenkins pipeline automatically:
+
+1 Build project\
+2 Start containers\
+3 Execute tests\
+4 Generate reports\
+5 Archive results
+
+### Parallel Execution
+
+Uses:
+
+pytest‑xdist
+
+To run tests in parallel workers and reduce execution time.
+
+------------------------------------------------------------------------
+
+## Test Scenarios
+
+The suite validates the full **CRUD (Create, Read, Update, Delete)**
+lifecycle and persona‑based access across these scenarios:
 
 ### OHRM_1: Employee Lifecycle (Admin Path)
 
-**Functional:** - Validates successful login - Validates Add Employee
-workflow in the PIM module
+**Validates:**
+
+-   Login functionality
+-   Add employee workflow
+-   PIM module integration
 
 ### OHRM_2: Data Integrity & Search (Positive)
 
-**Functional:** - Verifies that searching for a valid Employee ID
-returns the correct expected record
+**Validates:**
+
+-   Employee search
+-   Correct record retrieval
+-   Database/UI consistency
 
 ### OHRM_3: Negative Testing & Edge Cases
 
-**Robustness:** - Validates system behavior when searching for a
-non‑existent ID
+**Validates:**
 
-**Assertion:** - Confirms the UI correctly displays the **"No Records
-Found"** state
+-   Invalid employee search
+-   System stability
+-   UI error handling
+
+**Assertion:**
+
+"No Records Found" state is displayed.
 
 ### OHRM_4: Asynchronous Modal & Delete Workflow
 
-**Technical Challenge:** - Handles asynchronous confirmation pop‑ups
-(modals) to delete a record
+**Technical validations:**
 
-**Verification:** - Re‑searches for the deleted ID - Ensures data
-removal and UI synchronization
+-   Async modal handling
+-   Confirmation dialog automation
+-   Record deletion validation
+-   UI refresh synchronization
 
 ### OHRM_5: Self‑Service (ESS Persona)
 
-**Persona Testing:** - Logs in as an ESS employee - Verifies restricted
-access permissions
+**Validates:**
 
-**Profile Management:** - Validates My Info module - Updates personal
-user details
+-   Role based access
+-   Restricted modules
+-   Profile updates
+-   My Info module
 
-## Scalability: Data‑Driven Testing
+------------------------------------------------------------------------
 
-**Design:** - Uses @pytest.mark.parametrize to execute Add Employee
-tests with multiple datasets
+##  Tech Stack
 
-## Key Engineering Features
+  Category        Technology
+  --------------- ----------------------------
+  Language         Python
+  Framework        Pytest
+  Automation       Selenium WebDriver
+  Grid             Selenium Grid
+  Containers       Docker
+  CI/CD            Jenkins
+  Reporting        Allure
+  Design Pattern   Page Object Model
 
-### Page Object Model (POM)
+------------------------------------------------------------------------
 
-Centralized locators and reusable actions inside the Pages directory for
-better maintainability.
+##  Project Structure
 
-### Wait Strategies
+    orangehrm_automation
+    ├── Pages/             # Page Object Model locators and actions
+    ├── TestCases/         # Pytest test scripts
+    ├── allure-results/    # Generated test data for reporting
+    ├── Dockerfile         # Python environment configuration
+    ├── docker-compose.yml # Selenium Grid & Service orchestration
+    ├── Jenkinsfile        # CI/CD Pipeline definition
+    ├── config.ini         # Environment & URL configurations
+    └── requirements.txt   # Project dependencies
 
-Implements WebDriverWait with expected_conditions to handle: - Success
-toast messages - Table refresh delays - Dynamic UI elements
+------------------------------------------------------------------------
 
-This prevents flaky tests.
+##  Execution Guide
 
-### Dynamic Data Handling
+### 1. One‑Command Run (Docker)
 
-Generates unique Employee IDs using timestamps to prevent duplicate ID
-failures during repeated executions.
-
-### Robust Interactions
-
-Uses: - JavaScript execution - Scrolling - Click interception handling
-
-To interact with UI elements blocked by overlays.
-
-##  Setup & Execution
-
-### 1. Installation
+The most efficient way to run the suite is via Docker Compose. This
+spins up the Hub, Nodes, and Test container automatically.
 
 ``` bash
-git clone https://github.com/amrutha-tester/orangehrm_automation
-cd orangehrm_automation
+docker-compose up --build
+```
+
+Framework automatically:
+
+✔ Starts Selenium Grid\
+✔ Starts browsers\
+✔ Waits for Hub health\
+✔ Executes tests\
+✔ Generates reports
+
+### 2. Manual Execution (Local)
+
+If running without Docker, ensure you have the requirements installed:
+
+Install dependencies:
+
+``` bash
 pip install -r requirements.txt
 ```
 
-### 2. Run All Tests with Reporting
+Run tests:
 
 ``` bash
 pytest TestCases/ --alluredir=allure-results
 ```
 
-### 3. Generate Interactive Dashboard
+### 3. Reporting
+
+To view the interactive graphical dashboard:
 
 ``` bash
 allure serve allure-results
 ```
 
-##  Tech Stack
+------------------------------------------------------------------------
 
-  Category            Technology
-  ------------------- --------------------
-  Language            Python 3.x
-  Automation          Selenium WebDriver
-  Test Runner         Pytest
-  Reporting           Allure Reports
-  Environment         Webdriver‑Manager
-  Framework Pattern   Page Object Model
+##  Engineering Capabilities
 
-##  Project Structure
+### Smart Wait Strategy
 
-    orangehrm_automation
-    │
-    ├── Pages/
-    ├── TestCases/
-    ├── requirements.txt
-    ├── pytest.ini
-    |── config.ini
-    └── README.md
+Uses:
 
-##  Framework Capabilities
+WebDriverWait + Expected Conditions
 
--   End‑to‑end automation
--   Data‑driven testing
--   Role‑based testing
--   Negative testing
--   UI synchronization handling
--   Allure reporting
--   Scalable framework design
+To handle:
+
+-   Dynamic tables
+-   Async popups
+-   DOM refreshes
+
+### Data Driven Testing
+
+Uses:
+
+pytest parametrize
+
+Allows:
+
+Multiple datasets Reusable workflows
+
+### Stability Engineering
+
+Framework includes:
+
+-   Retry connection logic
+-   Scroll into view fallback
+-   JavaScript click fallback
+-   Element visibility guards
+
+### Maintainability
+
+Uses Page Object Model:
+
+Separates:
+
+Test logic UI locators Business actions
+
+Improves maintainability and readability.
+
+------------------------------------------------------------------------
+
+##  Key Benefits
+
+-   Scalable distributed test execution
+-   Containerized infrastructure
+-   CI/CD ready automation framework
+-   Parallel execution support
+-   Professional reporting with Allure
+-   Maintainable design using Page Object Model
+
+------------------------------------------------------------------------
 
 ##  Future Improvements
 
 Possible enhancements:
 
--   CI/CD integration (GitHub Actions / Jenkins)
--   Docker execution
+-   API testing integration
+-   Performance testing
+-   GitHub Actions pipeline
+-   Slack notifications
+-   Test analytics dashboard
 
-
-
-
-------------------------------------------------------------------------
-
-⭐ If you found this useful, consider giving the repository a star.
