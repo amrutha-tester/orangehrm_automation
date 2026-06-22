@@ -142,17 +142,19 @@ lifecycle and persona‑based access across these scenarios:
 
 ------------------------------------------------------------------------
 
-##  Project Structure
+## Project Structure
 
-    orangehrm_automation
-    ├── Pages/             # Page Object Model locators and actions
-    ├── TestCases/         # Pytest test scripts
-    ├── allure-results/    # Generated test data for reporting
-    ├── Dockerfile         # Python environment configuration
-    ├── docker-compose.yml # Selenium Grid & Service orchestration
-    ├── Jenkinsfile        # CI/CD Pipeline definition
-    ├── config.ini         # Environment & URL configurations
-    └── requirements.txt   # Project dependencies
+```text
+orangehrm_automation/
+├── Docs/                 # Test plan, test cases
+├── Pages/                # POM locators and actions
+├── TestCases/            # Pytest test scripts
+├── Dockerfile           # Python environment configuration
+├── docker-compose.yml   # Selenium Grid & Service orchestration
+├── Jenkinsfile         # CI/CD Pipeline definition
+├── config.ini           # Environment & URL configurations
+└── requirements.txt     # Project dependencies
+```
 
 ------------------------------------------------------------------------
 
